@@ -1,0 +1,53 @@
+## chart name
+##
+chartName: helloworld
+
+## service docker image repo and tag
+##
+image:
+  repository: ppcololo/helloworld
+  tag: latest
+  pullPolicy: Always
+
+## app http port
+##
+service:
+  port: 8080
+
+## http checks to know about app status: started, ready to connect and so on
+##
+checks:
+  enabled: true
+  livenessProbe:
+    scheme: HTTP
+    path: /liveness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+  readinessProbe:
+    scheme: HTTP
+    path: /actuator/health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 3
+
+## If true, will create ingress to access service via http
+##
+ingress:
+  enabled: true
+  hostname: helloworld.server.com
+
+## Count of pods
+##
+replicaCount: 1
+
+## resource requests and limits
+## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 100m
+  limits:
+    memory: 1Gi
+    cpu: 1

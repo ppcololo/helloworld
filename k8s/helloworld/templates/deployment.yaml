@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Values.chartName }}
+    version: "{{ .Values.image.tag }}"
+    chart: {{ .Values.chartName }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.chartName }}
+        version: "{{ .Values.image.tag }}"
+        chart: {{ .Values.chartName }}-{{ .Chart.Version }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.checks.enabled }}
+        livenessProbe:
+          httpGet:
+            scheme: {{ .Values.checks.livenessProbe.scheme }}
+            path: {{ .Values.checks.livenessProbe.path }}
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: {{ .Values.checks.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.checks.livenessProbe.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            scheme: {{ .Values.checks.readinessProbe.scheme }}
+            path: {{ .Values.checks.readinessProbe.path }}
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: {{ .Values.checks.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.checks.livenessProbe.periodSeconds }}
+          failureThreshold: {{ .Values.checks.readinessProbe.failureThreshold }}
+{{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
