@@ -1,7 +1,5 @@
 package com.example.helloworld.helloworld;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,7 +10,6 @@ import java.util.Map;
 public class Controller {
 
     private static Map<String, String> alwaysOk = Collections.singletonMap("status", "OK");
-    private MeterRegistry registry = new SimpleMeterRegistry();
     private final MetricsTotalRequestCounter counterMetric;
 
     public Controller(MetricsTotalRequestCounter counterMetric) {
